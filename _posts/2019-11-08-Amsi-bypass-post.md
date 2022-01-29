@@ -8,22 +8,22 @@ Powershell can be a powerful tool during the post-exploitation phase of our enga
 ## What is AMSI?
 AMSI stands for "Anti Malware Scan Interface" and it's job is to scan and block anything malicious.
 Still don't know what I'm talking about? Perhaps this will help:
-<img src="/research/img/amsi-bypass-post/1.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/1.PNG?raw=true">
 Obviously if you are experienced with pentesting in AD networks, you encountered this error with almost all public known scripts.
 
 ## How AMSI works exactly?
 It uses a string based detection mechanism to detect “dangerous” commands and potentially malicious scripts.
 Check out this example:
-<img src="/research/img/amsi-bypass-post/2.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/2.PNG?raw=true">
 As you can see the word "amsiutils" is prohibited so any Powershell scripts containing this word will be blocked by AMSI.
 
 ## So how can we bypass it?
 Good thing you asked because I got some examples for you.
 String based detection are very easy to bypass - just refrain from using the banned string literally.
 Here are some ways to execute banned string without actually using it:
-<img src="/research/img/amsi-bypass-post/3.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/3.PNG?raw=true">
 By simply splitting the string you could fool AMSI and execute your banned string. This is a very common technique to use in obfuscation in general.
-<img src="/research/img/amsi-bypass-post/4.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/4.PNG?raw=true">
 You can also encode your string to base64 - in most cases that will be enough to fool AMSI.
 If all else fails we can encode the string to bytes and even use XOR to make it even harder for AMSI but we will discuss that towards the end of the post.
 The examples above are mere workarounds though, and to do this with every online public scripts we want to use is simply impractical.
@@ -89,7 +89,7 @@ and to execute it, we simply call the now loaded function inside the DLL:
 PS C:\Users\Mor> [BP.AMS]::Disable()
 ```
 This is how it looks in action:
-<img src="/research/img/amsi-bypass-post/5.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/5.PNG?raw=true">
 As you can see, we are now able to use the string "amsiutils" literally. We have successfully disabled AMSI. Right now we can load any external Powershell script like PowerSploit or Nishang without AMSI blocking it.
 
 ## Putting it all together
@@ -99,7 +99,7 @@ To encode the dll to base64 I used this command:
 ```powershell
 PS C:\Users\Mor> $encoded_dll_string = [Convert]::ToBase64String([IO.File]::ReadAllBytes("$pwd\\Source.dll"))
 ```
-<img src="/research/img/amsi-bypass-post/6.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/6.PNG?raw=true">
 The resulted string is the encoded DLL.
 
 We can load it into memory like this:
@@ -108,7 +108,7 @@ We can load it into memory like this:
 PS C:\Users\Mor> [Reflection.Assembly]::Load([Convert]::FromBase64String($encoded_dll_string)) | Out-Null
 ```
 To my surprise, AMSI detected my encoded DLL string (or at least some part of it) as malicious and blocked it:
-<img src="/research/img/amsi-bypass-post/7.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/7.PNG?raw=true">
 I managed to bypass this by splitting the string somewhere in the middle (after some trial and error) but in my final script I decided to go with something a bit more "long-term": ByteString + XOR
 Since AMSI only detects strings and not logic I needed a way to represent the DLL code with a string that I could easily change whenever AMSI decides to ban it.
 
@@ -151,7 +151,7 @@ function AMSBP
 ```
 
 Here is the final [hosted script](https://raw.githubusercontent.com/Dec0ne/AMS-BP/master/AMSBP.ps1) in action:
-<img src="/research/img/amsi-bypass-post/8.PNG?raw=true">
+<img class="fill" src="/research/img/amsi-bypass-post/8.PNG?raw=true">
 
 As you can see this technique is pretty simple to use and very useful when you wish to load some Powershell post-exploitation scripts that were once blocked by AMSI.
 
