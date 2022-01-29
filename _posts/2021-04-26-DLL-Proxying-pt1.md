@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title: "DLL Proxying in the Tele-Conferencing Age"
