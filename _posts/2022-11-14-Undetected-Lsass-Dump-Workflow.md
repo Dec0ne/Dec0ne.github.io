@@ -609,3 +609,4 @@ I leave that all as an exercise for the reader as I just wanted to illustrate ho
 ## Acknowledgments
 * Shout out to [Sektor7](https://institute.sektor7.net/) for the XOR decryption script and for the technique of adding details to a PE (taught in their [Windows Evasions Course](https://institute.sektor7.net/rto-win-evasion))
 * Big thanks to [IRed.Team](https://www.ired.team/) ([spotheplanet](https://twitter.com/spotheplanet)) for the technique to dump lsass to a buffer in memory instead to a file on disk. [Link](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/dumping-lsass-passwords-without-mimikatz-minidumpwritedump-av-signature-bypass) for the blog post.
+* Big Shout Out to my friend an colleague [Shlomi Nechama](https://www.linkedin.com/in/shlomine/) for the constant brainstorming.
