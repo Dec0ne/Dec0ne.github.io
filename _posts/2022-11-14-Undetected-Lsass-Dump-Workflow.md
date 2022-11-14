@@ -4,7 +4,6 @@ title: "It’s all in the details: The curious case of an lsass dumper gone unde
 author: "Mor Davidovich @Dec0ne"
 ---
 
-# It’s all in the details: The curious case of an lsass dumper gone undetected
 Let me first start by saying I will not be revealing in this post any novel techniques or new research that hasn't been seen before. 
 I will, however, reveal my own methodology when it comes to finding gaps in EDRs visibility in order to bypass detection. 
 I will do so by showing the process of finding a simple way to dump lsass using basic and well known techniques while still being undetected even by the most sophisticated EDRs on the market.
