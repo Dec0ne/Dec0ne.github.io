@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 To my surprise, Windows Defender (patience my friend, we’ll get to a more advanced EDR in a minute) did not alert on the executable when I copied it to a non-excluded folder. 
 Furthermore, when executing it I got an alert on the dump file itself but not the executable – it was left untouched on disk and Windows Defender just deleted the dump file (not the lsass dumper executable).
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/wd_1.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/wd_1.jpg">
 
 Thinking critically when doing malware development is paramount and in this case the solution seems very simple and obvious – Windows Defender only recognizes the LSASS.DMP dump file as a dump of lsass and alerts on it, even though it’s not really sure what happened or else it would also delete the LsassDumper.exe that performed the dump or at least alert on the lsass dump process being performed. 
 
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 
 Running the new version against Windows Defender raises no alerts. 
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/wd_2.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/wd_2.jpg">
 
 Of course the dump file is XOR encrypted, but we can take it offline, decrypt it and then parse it with mimikatz or pypykatz using this ***decrypt.py*** script.
 
@@ -335,7 +335,7 @@ sys.exit()
 
 When testing this version against a more advanced EDR we get an alert and the lsass dumper executable gets deleted as soon as it touches the disk, obviously the EDR does not like our file.
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/edr_1.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/edr_1.jpg">
 
 ## Great Things
 One little trick I find extremely useful when my malware has to touch disk is to add some details (properties and version info) to it. 
@@ -348,16 +348,16 @@ Here's how to do it:
 
 We load a legitimate PE file to [ResourceHacker](http://www.angusj.com/resourcehacker/), in this case it’s *Greenshot.exe*, and go over to the ***Version Info*** tab.
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/rh_1.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/rh_1.jpg">
 
 Next, we copy the version info block containing *Greenshot.exe* details to a text file with the name ***VersionInfo1.rc*** and save it in our VS project folder. 
 We then simply include the ***VersionInfo1.rc*** file in the project build by right-clicking on it and select "***Include In Project***".
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/rh_2.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/rh_2.jpg">
 
 Now, every time we build our project those properties and version details will be embedded in our final executable.
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/rh_3.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/rh_3.jpg">
 
 At this stage, the current version of the executable manages to bypass the EDR which is configured with the “***Aggressive***” Detection and Prevention settings and successfully dump the lsass process to an encrypted file on disk. 
 
@@ -368,7 +368,7 @@ Notice how we didn't change any line of code in our lsass dumper and still we ma
 ## Extra Great Things
 It was mentioned to me that on the “***Extra Aggressive***” settings this will not fly and when I initially tested that I indeed saw that the EDR raised an alert although the lsass process was successfully dumped and no deletion of neither the executable nor the encrypted dump file occurred. 
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/edr_2.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/edr_2.jpg">
 
 Still, I’m up for a challenge, and I wanted to have this lsass dumper be fully undetected by even the most aggressive settings the EDR has to offer, and so I went over to the EDR Console and looked at the description of the alert. 
 To my surprise the EDR states that it successfully killed the process, without deleting the executable on disk which is weird. 
@@ -579,11 +579,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 We should remember to change the configuration type of our VS project to “***Dynamic Library (.dll)***”
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/dll_1.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/dll_1.jpg">
 
 And finally we are ready to compile the project.
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/dll_2.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/dll_2.jpg">
 
 To run this version (see what I did there?) of our lsass dumper all we need to do is copy the malicious DLL into the folder ***"C:\Program Files\Windows Photo Viewer\"***, change its name to “***version.dll***” and lastly, run the “***ImagingDevices.exe***” as Administrator after which the encrypted dump file will be written to the same folder with hopefully no alerts.
 
@@ -597,7 +597,7 @@ It's not my intention to pick on this particular EDR, and I've also tested this 
 
 AntiScan.me seems to agree with the results as well.
 
-<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/dll-proxying-pt1/final_antiscan.jpg">
+<img class="fill" src="https://raw.githubusercontent.com/Dec0ne/research/master/img/undetected-lsass-dump-workflow/final_antiscan.jpg">
 
 ## Conclusion
 In this blog post I didn't share anything new but rather a combination of few different techniques and mainly my workflow and thought process when it comes to developing malware and evading detection (hopefully I did a decent job at that).
